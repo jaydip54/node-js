@@ -1,55 +1,39 @@
-name: Node.js Docker CI/CD
+name: CI/CD for Node.js Docker App
 
 on:
   push:
     branches:
-      - main  # Trigger on push to the 'main' branch
-  pull_request:
-    branches:
-      - main  # Trigger on pull requests targeting 'main'
+      - main
 
 jobs:
-  build:
+  build-and-push:
     runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Checkout the code
-    - name: Checkout code
-      uses: actions/checkout@v3
+      # Step 1: Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    # Step 2: Set up Node.js environment
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: 18
+      # Step 2: Log in to Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-    # Step 3: Install dependencies and run tests
-    - name: Install dependencies
-      run: npm install
+      # Step 3: Build and push Docker image
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t <your-dockerhub-username>/node-js-app:latest .
+          docker push <your-dockerhub-username>/node-js-app:latest
 
-    - name: Run tests
-      run: npm test
-
-  docker:
+  deploy:
     runs-on: ubuntu-latest
-    needs: build  # Ensure the 'build' job runs successfully first
+    needs: build-and-push
 
     steps:
-    # Step 1: Checkout the code
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    # Step 2: Log in to Docker Hub
-    - name: Log in to Docker Hub
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-
-    # Step 3: Build and tag the Docker image
-    - name: Build Docker image
-      run: docker build -t ${{ secrets.DOCKER_USERNAME }}/node-app:latest .
-
-    # Step 4: Push the Docker image to Docker Hub
-    - name: Push Docker image to Docker Hub
-      run: docker push ${{ secrets.DOCKER_USERNAME }}/node-app:latest
+      - name: Deploy to Render
+        run: |
+          curl -X POST "https://api.render.com/v1/services/<YOUR-SERVICE-ID>/deploys" \
+          -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+          -H "Content-Type: application/json"
