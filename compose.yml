@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  node-app:
+    image: nodemon-demo # Replace with your built image name
+    build:
+      context: . # Use the current directory for the build context
+    container_name: node-app
+    ports:
+      - "5000:5000" # Map port 5000 on host to 5000 in the container
+    volumes:
+      - "D:/DEMO/docker/node js:/app" # Bind mount the local directory to /app in the container
+    working_dir: /app # Set working directory inside the container
+    command: [ "npm", "run", "dev" ] # Run the dev script with nodemon
