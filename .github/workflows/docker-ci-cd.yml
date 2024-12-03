@@ -24,8 +24,8 @@ jobs:
       # Step 3: Build and push Docker image
       - name: Build and Push Docker Image
         run: |
-          docker build -t jaydip54/node-js-app:latest .  # Replace with your Docker Hub username
-          docker push jaydip54/node-js-app:latest  # Replace with your Docker Hub username
+          docker build -t jaydip54/cicd:latest .  # Replace with your Docker Hub username
+          docker push jaydip54/cicd:latest  # Replace with your Docker Hub username
 
   deploy:
     runs-on: ubuntu-latest
